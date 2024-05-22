@@ -8,6 +8,10 @@ import {
   chain,
 } from "@motion-canvas/core";
 
+function getRandomInt(max: number) {
+  return Math.floor(Math.random() * max);
+}
+
 export default makeScene2D(function* (view) {
   const rects: Rect[] = [];
   const texts: Txt[] = [];
@@ -22,6 +26,11 @@ export default makeScene2D(function* (view) {
   const gridCellBackgroundColour = "#594f75";
   const gridCellCompleteBackgroundColour = "#796a94";
   const selectedGridCellBackgroundColour = "#dba456";
+  const textColourLowest = "#25257d";
+  const textColourLow = "#69ff8e";
+  const textColourMedium = "#69ff8e";
+  const textColourHigh = "#ffd469";
+  const textColourHighest = "#f70f0f";
 
   view.fill(backgroundColour);
 
@@ -44,7 +53,12 @@ export default makeScene2D(function* (view) {
           alignItems={"center"}
           paddingTop={8}
         >
-          <Txt fill={"white"} opacity={0} ref={makeRef(texts, i)} fontSize={12}>
+          <Txt
+            fill={textColourLowest}
+            opacity={0}
+            ref={makeRef(texts, i)}
+            fontSize={12}
+          >
             0.0
           </Txt>
         </Rect>
@@ -83,21 +97,30 @@ export default makeScene2D(function* (view) {
 
   // Iterate through the grid
   yield* chain(
-    ...rects.map((rect) => {
+    ...rects.map((rect, i) => {
+      const shouldInsertHotspot = getRandomInt(10) <= 0;
       return chain(
         all(
-          rect.height(110, 0.2),
-          rect.width(110, 0.2),
-          rect.fill(selectedGridCellBackgroundColour, 0.2).wait(0.1)
+          rect.height(105, 0.1),
+          rect.width(105, 0.1),
+          rect.fill(selectedGridCellBackgroundColour, 0.1).wait(0.03),
+          texts[i].text(shouldInsertHotspot ? "1.0" : "0.0", 0.1),
+          texts[i].fill(
+            shouldInsertHotspot ? textColourHighest : textColourLowest,
+            0.1
+          )
         ),
         all(
           rect.height(100, 0.3),
           rect.width(100, 0.3),
-          rect.fill(gridCellCompleteBackgroundColour, 0.3)
+          rect.fill(
+            shouldInsertHotspot ? "#540e0e" : gridCellCompleteBackgroundColour,
+            0.3
+          )
         )
       );
     })
   );
 
-  yield* waitFor(0.5);
+  yield* waitFor(1);
 });
